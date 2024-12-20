@@ -16,18 +16,17 @@ function index(req, res) {
 
 
 //show
-// function show(req, res) {
-//   let identifier = req.params.identifier
-//   console.log(`Parametro dinamico: ${identifier}`)
-//   //Funzione per convertire identifier
-//   const post = converter(identifier, posts)
+function show(req, res) {
+  const id = req.params.identifier
 
-//   if (!post) {
-//     return errorsHandler(err, req, res, next)
-//   }
-//   res.json(post)
+  const sql = `SELECT * FROM db_posts.posts	WHERE id = ?`
 
-// }
+  connection.query(sql, [id], (err, results) => {
+    if (err) return res.status(500).json({ error: 'Database query failed' })
+    if (results.length === 0) return res.status(404).json({ error: 'Post not found' })
+    res.json(results[0])
+  })
+}
 
 
 // //Store
@@ -144,7 +143,7 @@ function index(req, res) {
 //   console.log(`Elenco dolci rimasti: ${remainingSweet}`)
 // }
 
-module.exports = { index }
+module.exports = { index, show }
 // show, store, update, modify, destroy }
 
 

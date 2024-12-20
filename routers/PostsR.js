@@ -9,7 +9,7 @@ router.get('/', postController.index)
 
 
 //show
-// router.get('/:identifier', postController.show)
+router.get('/:identifier', postController.show)
 
 
 
