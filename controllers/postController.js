@@ -15,24 +15,24 @@ function index(req, res) {
 
 //show
 function show(req, res) {
-  const id = req.params.identifier
-  const postsql = `SELECT * FROM db_posts.posts WHERE id = ?`
+  const { identifier } = req.params
+  const postsql = `SELECT * FROM db_posts.posts WHERE id = ? OR title = ?`
 
   const tagsql = `
     SELECT t.* FROM tags AS t 
     JOIN post_tag ON t.id = post_tag.tag_id
-    WHERE post_tag.post_id = ?
+    WHERE post_tag.post_id = ? 
   `
 
   //Query per il post
-  connection.query(postsql, [id], (err, postResults) => {
+  connection.query(postsql, [identifier, identifier], (err, postResults) => {
     if (err) return res.status(500).json({ error: 'Database query failed' })
     if (postResults.length === 0) return res.status(404).json({ error: 'Post not found' })
 
     const post = postResults[0]
 
     // Query per i tag
-    connection.query(tagsql, [id], (err, tagsResult) => {
+    connection.query(tagsql, [identifier], (err, tagsResult) => {
       if (err) return res.status(500).json({ error: 'Database query failed' })
 
       post.tags = tagsResult // Aggiungo tag al post
