@@ -28,6 +28,6 @@ router.get('/:identifier', postController.show)
 
 
 // destroy
-// router.delete('/:identifier', postController.destroy)
+router.delete('/:identifier', postController.destroy)
 
 module.exports = router

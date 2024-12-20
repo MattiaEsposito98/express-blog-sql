@@ -1,6 +1,4 @@
-// const posts = require('../data/posts')
 const { validate, converter, converterForDestroy } = require('../data/utilities')
-// let lastIndex = posts.at(-1).id
 const connection = require('../data/db')
 
 
@@ -18,15 +16,31 @@ function index(req, res) {
 //show
 function show(req, res) {
   const id = req.params.identifier
+  const postsql = `SELECT * FROM db_posts.posts WHERE id = ?`
 
-  const sql = `SELECT * FROM db_posts.posts	WHERE id = ?`
+  const tagsql = `
+    SELECT t.* FROM tags AS t 
+    JOIN post_tag ON t.id = post_tag.tag_id
+    WHERE post_tag.post_id = ?
+  `
 
-  connection.query(sql, [id], (err, results) => {
+  //Query per il post
+  connection.query(postsql, [id], (err, postResults) => {
     if (err) return res.status(500).json({ error: 'Database query failed' })
-    if (results.length === 0) return res.status(404).json({ error: 'Post not found' })
-    res.json(results[0])
+    if (postResults.length === 0) return res.status(404).json({ error: 'Post not found' })
+
+    const post = postResults[0]
+
+    // Query per i tag
+    connection.query(tagsql, [id], (err, tagsResult) => {
+      if (err) return res.status(500).json({ error: 'Database query failed' })
+
+      post.tags = tagsResult // Aggiungo tag al post
+      res.json(post) //risposta finale
+    })
   })
 }
+
 
 
 // //Store
@@ -124,26 +138,20 @@ function show(req, res) {
 
 
 
-// // destroy
-// function destroy(req, res) {
-//   let identifier = req.params.identifier
-//   console.log(`Elimino dolce: ${identifier}`)
-//   //Funzione per convertire identif
-//   const postIndex = converterForDestroy(identifier, posts)
+// destroy
+function destroy(req, res) {
+  const { identifier } = req.params
 
-//   if (postIndex === -1) {
-//     return errorsHandler(err, req, res, next)
-//   }
+  const destroysql = `DELETE FROM db_posts.posts WHERE id = ?`
+  connection.query(destroysql, [identifier], (err, results) => {
+    if (err) return res.status(500).json({ error: 'Failed to delete post' })
+    res.sendStatus(204)
+  })
+}
 
-//   posts.splice(postIndex, 1)
 
-//   res.sendStatus(204)
-//   console.log(`${identifier} eliminato`)
-//   const remainingSweet = posts.map((post) => post.title)
-//   console.log(`Elenco dolci rimasti: ${remainingSweet}`)
-// }
 
-module.exports = { index, show }
+module.exports = { index, show, destroy }
 // show, store, update, modify, destroy }
 
 
