@@ -32,7 +32,7 @@ function show(req, res) {
     const post = postResults[0]
 
     // Query per i tag
-    connection.query(tagsql, [identifier], (err, tagsResult) => {
+    connection.query(tagsql, [post.id], (err, tagsResult) => {
       if (err) return res.status(500).json({ error: 'Database query failed' })
 
       post.tags = tagsResult // Aggiungo tag al post
